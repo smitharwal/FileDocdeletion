@@ -400,7 +400,7 @@ public class DocumentDeletion {
 					//get details of files to be deleted
 					rs = stmt.executeQuery("Select TOP " + jdbcMaxRows + " tx.FILE_NAME as file_name, tx.SOURCE_PROPOSAL_NO as case_no , tx.nbh_odd_id as omni_id, nbh.nbh_cdd_id as nbh_doc_id, tx.created_on as omni_created_on " 
 							+ "from NBH_OMNI_DOCUMENT_DETAILS AS tx with(nolock) JOIN NBH_CASE_DOCUMENT_DETAILS AS nbh with(nolock) ON tx.SOURCE_PROPOSAL_NO =(select nbh1.source_proposal_number from NBH_UW_CASE_DETAILS nbh1 with(nolock) where nbh.nbh_ucd_id=nbh1.nbh_ucd_id) " 
-							+ "and tx.FILE_NAME=nbh.doc_name where tx.Omni_Flag='Y' and tx.file_name is not null order by tx.nbh_odd_id");
+							+ "and tx.FILE_NAME=nbh.doc_name where tx.Omni_Flag='Y' and nbh.is_delete is null and tx.file_name is not null order by tx.nbh_odd_id");
 
 					//loop over result set to delete docs from all applicable locations
 					while (rs.next()) {
@@ -561,7 +561,7 @@ public class DocumentDeletion {
 		Statement stmt  = null;
 		try {
 			stmt = conn.createStatement();
-			stmt.executeUpdate("update NBH_CASE_DOCUMENT_DETAILS with (rowlock) set is_delete='"+ (isSuccess ? "Y":"Z") +"' where id=" + fileSystemId);
+			stmt.executeUpdate("update NBH_CASE_DOCUMENT_DETAILS with (rowlock) set is_delete='"+ (isSuccess ? "Y":"Z") +"' where nbh_cdd_id=" + fileSystemId);
 			//			logWriter.write(getLogTime('I') + "Update is_delete flag for id = " + fileSystemId + ".\n");
 		} catch (SQLException e) {
 			logWriter.write(getLogTime('E') + "SQLException occured while trying to update flag. Error: " + e.getMessage() + "\n\n");
